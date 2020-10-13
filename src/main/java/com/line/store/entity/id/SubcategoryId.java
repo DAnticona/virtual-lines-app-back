@@ -1,10 +1,14 @@
 package com.line.store.entity.id;
 
+import java.io.Serializable;
+
 import javax.persistence.Column;
 import javax.persistence.Embeddable;
 
 @Embeddable
-public class SubcategoryId {
+public class SubcategoryId implements Serializable {
+	
+	private static final long serialVersionUID = 1L;
 	
 	@Column(name = "category_id")
 	private Integer categoryId;

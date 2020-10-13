@@ -6,13 +6,13 @@ import org.springframework.stereotype.Component;
 @Component
 public class CryptPassword {
 
-//	public static void main(String[] args) {
-//		String password = "system";
-//
-//		System.out.println("password: " + password);
-//		System.out.println("password encriptado: " + codificar(password));
-//
-//	}
+	public static void main(String[] args) {
+		String password = "123";
+
+		System.out.println("password: " + password);
+		System.out.println("password encriptado: " + codificar(password));
+
+	}
 	
 	public static String codificar(String password) {
 		BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
