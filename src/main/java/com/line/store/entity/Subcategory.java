@@ -1,37 +1,42 @@
 package com.line.store.entity;
 
+import java.io.Serializable;
+
 import javax.persistence.Column;
-import javax.persistence.EmbeddedId;
 import javax.persistence.Entity;
+import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
-import javax.persistence.MapsId;
 import javax.persistence.Table;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
-import com.line.store.entity.id.SubcategoryId;
 
 @Entity
 @Table(name = "subcategory")
-public class Subcategory {
+public class Subcategory implements Serializable {
 	
-	@EmbeddedId
-	private SubcategoryId subcategoryId;
+	private static final long serialVersionUID = -2701048908553961154L;
+
+	@Id
+	@Column(name = "subcategory_id")
+	private String subcategoryId;
 	
-	@MapsId("categoryId")
 	@ManyToOne
 	@JoinColumn(name = "category_id", referencedColumnName = "category_id")
 	@JsonBackReference
 	private Category category;
 	
-	@Column(name = "name")
+	@Column(name = "name", nullable = false)
 	private String name;
+	
+	@Column(name = "active_fg", nullable = false)
+	private String activeFg;
 
-	public SubcategoryId getSubcategoryId() {
+	public String getSubcategoryId() {
 		return subcategoryId;
 	}
 
-	public void setSubcategoryId(SubcategoryId subcategoryId) {
+	public void setSubcategoryId(String subcategoryId) {
 		this.subcategoryId = subcategoryId;
 	}
 
@@ -51,9 +56,17 @@ public class Subcategory {
 		this.name = name;
 	}
 
-	@Override
-	public String toString() {
-		return "Subcategory [subcategoryId=" + subcategoryId + ", category=" + category + ", name=" + name + "]";
+	public String getActiveFg() {
+		return activeFg;
 	}
 
+	public void setActiveFg(String activeFg) {
+		this.activeFg = activeFg;
+	}
+
+	@Override
+	public String toString() {
+		return "Subcategory [subcategoryId=" + subcategoryId + ", category=" + category + ", name=" + name
+				+ ", activeFg=" + activeFg + "]";
+	}
 }

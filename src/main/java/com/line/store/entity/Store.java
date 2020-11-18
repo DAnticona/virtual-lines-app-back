@@ -1,44 +1,44 @@
 package com.line.store.entity;
 
+import java.io.Serializable;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
-import javax.persistence.JoinColumns;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
 @Entity
 @Table(name = "store")
-public class Store {
+public class Store implements Serializable {
 	
+	private static final long serialVersionUID = 7294085142802075611L;
+
 	@Id
 	@Column(name = "store_id")
 	private String storeId;
 	
 	@ManyToOne
-	@JoinColumns({
-		@JoinColumn(name = "category_id", referencedColumnName = "category_id"),
-		@JoinColumn(name = "subcategory_id", referencedColumnName = "subcategory_id")
-	})
+	@JoinColumn(name = "subcategory_id", referencedColumnName = "subcategory_id")
 	private Subcategory subcategory;
 	
-	@Column(name = "active_fg")
+	@Column(name = "active_fg", nullable = false)
 	private String activeFg;
 	
-	@Column(name = "public_name")
+	@Column(name = "public_name", nullable = false)
 	private String publicName;
 	
-	@Column(name = "latitude")
+	@Column(name = "latitude", nullable = false)
 	private Double latitude;
 	
-	@Column(name = "longitude")
+	@Column(name = "longitude", nullable = false)
 	private Double longitude;
 	
 	@Column(name = "image")
 	private String image;
 	
-	@Column(name = "description")
+	@Column(name = "description", nullable = false)
 	private String description;
 	
 	@Column(name = "website")

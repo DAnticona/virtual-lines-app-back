@@ -15,24 +15,28 @@ public class CategoryConverter extends AbstractConverter<Category, CategoryDto> 
 	@Override
 	public Category fromDto(CategoryDto dto) {
 		Category category = new Category();
+		
 		category.setCategoryId(dto.getCategoryId());
 		category.setName(dto.getName());
+		category.setActiveFg(dto.getActiveFg());
 		
-		if(dto.getSubcategories() != null) {
-			subcategoryConverter.fromDto(dto.getSubcategories());
-		}
+//		if(dto.getSubcategories() != null) {
+//			subcategoryConverter.fromDto(dto.getSubcategories());
+//		}
 		return category;
 	}
 
 	@Override
 	public CategoryDto fromEntity(Category entity) {
 		CategoryDto category = new CategoryDto();
+		
 		category.setCategoryId(entity.getCategoryId());
 		category.setName(entity.getName());
+		category.setActiveFg(entity.getActiveFg());
 		
-		if(entity.getSubcategories() != null) {
-			subcategoryConverter.fromEntity(entity.getSubcategories());
-		}
+//		if (entity.getSubcategories() != null) {
+//			subcategoryConverter.fromEntity(entity.getSubcategories());
+//		}
 		
 		return category;
 	}

@@ -45,14 +45,15 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
 	@Override
 	protected void configure(HttpSecurity http) throws Exception {
-		http.csrf().disable().authorizeRequests().antMatchers(HttpMethod.POST, "/login").permitAll().anyRequest()
-				.authenticated().and().exceptionHandling().authenticationEntryPoint(entryPoint).and()
-				.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
-		;
-
-		// Add a filter to validate the tokens with every request
-		http.addFilterBefore(new CustomCorsFilter(), UsernamePasswordAuthenticationFilter.class)
+		http.csrf().disable().authorizeRequests()
+				.antMatchers(HttpMethod.POST, "/login", "/register/user/new-client-user", "/register/store/new-store").permitAll()
+				.antMatchers(HttpMethod.GET, "/register/category", "/register/subcategory/{id}").permitAll().anyRequest().authenticated().and()
+				.exceptionHandling().authenticationEntryPoint(entryPoint).and().sessionManagement()
+				.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+				.and()
+				.addFilterBefore(new CustomCorsFilter(), UsernamePasswordAuthenticationFilter.class)
 				.addFilterBefore(requestFilter, UsernamePasswordAuthenticationFilter.class);
+				;
 	}
 
 }

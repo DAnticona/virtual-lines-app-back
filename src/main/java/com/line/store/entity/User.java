@@ -1,5 +1,7 @@
 package com.line.store.entity;
 
+import java.io.Serializable;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
@@ -9,34 +11,39 @@ import javax.persistence.Table;
 
 @Entity
 @Table(name = "user")
-public class User {
+public class User implements Serializable {
+
+	private static final long serialVersionUID = -5654942465144035794L;
 
 	@Id
 	@Column(name = "user_id")
 	private String userId;
 	
-	@ManyToOne
+	@ManyToOne(optional = true)
 	@JoinColumn(name = "store_id", referencedColumnName = "store_id")
 	private Store store;
 	
-	@ManyToOne
+	@ManyToOne(optional = true)
 	@JoinColumn(name = "role_id", referencedColumnName = "role_id")
 	private Role role;
 	
-	@Column(name = "store_fg")
+	@Column(name = "store_fg", nullable = false)
 	private String storeFg;
 	
-	@Column(name = "name")
+	@Column(name = "name", nullable = false)
 	private String name;
 	
-	@Column(name = "email", unique = true)
+	@Column(name = "email", unique = true, nullable = false)
 	private String email;
 	
-	@Column(name = "password")
+	@Column(name = "password", nullable = false)
 	private String password;
 	
-	@Column(name = "active_fg")
+	@Column(name = "active_fg", nullable = false)
 	private String activeFg;
+	
+	@Column(name = "image")
+	private String image;
 
 	public String getUserId() {
 		return userId;
@@ -101,11 +108,19 @@ public class User {
 	public void setActiveFg(String activeFg) {
 		this.activeFg = activeFg;
 	}
+	
+	public String getImage() {
+		return image;
+	}
+
+	public void setImage(String image) {
+		this.image = image;
+	}
 
 	@Override
 	public String toString() {
 		return "User [userId=" + userId + ", store=" + store + ", role=" + role + ", storeFg=" + storeFg + ", name="
-				+ name + ", email=" + email + ", password=" + password + ", activeFg=" + activeFg + "]";
+				+ name + ", email=" + email + ", password=" + password + ", activeFg=" + activeFg + "image=" + image + "]";
 	}
 
 }

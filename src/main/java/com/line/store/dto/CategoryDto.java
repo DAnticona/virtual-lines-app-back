@@ -1,17 +1,16 @@
 package com.line.store.dto;
 
-import java.util.List;
-
 public class CategoryDto {
 	
-	private Integer categoryId;
+	private String categoryId;
 	private String name;
-	private List<SubcategoryDto> subcategories;
+	private String activeFg;
+//	private List<SubcategoryDto> subcategories;
 	
-	public Integer getCategoryId() {
+	public String getCategoryId() {
 		return categoryId;
 	}
-	public void setCategoryId(Integer categoryId) {
+	public void setCategoryId(String categoryId) {
 		this.categoryId = categoryId;
 	}
 	public String getName() {
@@ -20,16 +19,20 @@ public class CategoryDto {
 	public void setName(String name) {
 		this.name = name;
 	}
-	public List<SubcategoryDto> getSubcategories() {
-		return subcategories;
+//	public List<SubcategoryDto> getSubcategories() {
+//		return subcategories;
+//	}
+//	public void setSubcategories(List<SubcategoryDto> subcategories) {
+//		this.subcategories = subcategories;
+//	}
+	public String getActiveFg() {
+		return activeFg;
 	}
-	public void setSubcategories(List<SubcategoryDto> subcategories) {
-		this.subcategories = subcategories;
+	public void setActiveFg(String activeFg) {
+		this.activeFg = activeFg;
 	}
-	
 	@Override
 	public String toString() {
-		return "CategoryDto [categoryId=" + categoryId + ", name=" + name + "]";
+		return "CategoryDto [categoryId=" + categoryId + ", name=" + name + ", activeFg=" + activeFg + "]";
 	}
-
 }

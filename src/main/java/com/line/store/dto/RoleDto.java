@@ -4,6 +4,7 @@ public class RoleDto {
 
 	private Integer roleId;
 	private String name;
+	private String clientFg;
 	
 	public Integer getRoleId() {
 		return roleId;
@@ -17,9 +18,14 @@ public class RoleDto {
 	public void setName(String name) {
 		this.name = name;
 	}
-	
+	public String getClientFg() {
+		return clientFg;
+	}
+	public void setClientFg(String clientFg) {
+		this.clientFg = clientFg;
+	}
 	@Override
 	public String toString() {
-		return "RoleDto [roleId=" + roleId + ", name=" + name + "]";
+		return "RoleDto [roleId=" + roleId + ", name=" + name + ", clientFg=" + clientFg + "]";
 	}
 }

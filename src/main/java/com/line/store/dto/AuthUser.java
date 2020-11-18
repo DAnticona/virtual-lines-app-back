@@ -9,7 +9,9 @@ public class AuthUser {
 	private String name;
 	private String email;
 	private String activeFg;
+	private String image;
 	private String token;
+	
 	public String getUserId() {
 		return userId;
 	}
@@ -58,9 +60,15 @@ public class AuthUser {
 	public void setToken(String token) {
 		this.token = token;
 	}
+	public String getImage() {
+		return image;
+	}
+	public void setImage(String image) {
+		this.image = image;
+	}
 	@Override
 	public String toString() {
 		return "AuthUser [userId=" + userId + ", store=" + store + ", role=" + role + ", storeFg=" + storeFg + ", name="
-				+ name + ", email=" + email + ", activeFg=" + activeFg + ", token=" + token + "]";
+				+ name + ", email=" + email + ", activeFg=" + activeFg + ", image=" + image + ", token=" + token + "]";
 	}
 }

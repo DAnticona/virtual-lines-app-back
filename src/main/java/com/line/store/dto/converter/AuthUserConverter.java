@@ -23,6 +23,7 @@ public class AuthUserConverter extends AbstractConverter<User, AuthUser> {
 		user.setActiveFg(dto.getActiveFg());
 		user.setName(dto.getName());
 		user.setStoreFg(dto.getStoreFg());
+		user.setImage(dto.getImage());
 		
 		if(dto.getRole() != null) {
 			user.setRole(roleConverter.fromDto(dto.getRole()));
@@ -44,6 +45,7 @@ public class AuthUserConverter extends AbstractConverter<User, AuthUser> {
 		user.setActiveFg(entity.getActiveFg());
 		user.setName(entity.getName());
 		user.setStoreFg(entity.getStoreFg());
+		user.setImage(entity.getImage());
 		
 		if(entity.getRole() != null) {
 			user.setRole(roleConverter.fromEntity(entity.getRole()));

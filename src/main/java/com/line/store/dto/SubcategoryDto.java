@@ -2,20 +2,21 @@ package com.line.store.dto;
 
 public class SubcategoryDto {
 	
-	private Integer categoryId;
-	private Integer subcategoryId;
+	private String subcategoryId;
+	private CategoryDto category;
 	private String name;
+	private String activeFg;
 	
-	public Integer getCategoryId() {
-		return categoryId;
+	public CategoryDto getCategory() {
+		return category;
 	}
-	public void setCategoryId(Integer categoryId) {
-		this.categoryId = categoryId;
+	public void setCategory(CategoryDto category) {
+		this.category = category;
 	}
-	public Integer getSubcategoryId() {
+	public String getSubcategoryId() {
 		return subcategoryId;
 	}
-	public void setSubcategoryId(Integer subcategoryId) {
+	public void setSubcategoryId(String subcategoryId) {
 		this.subcategoryId = subcategoryId;
 	}
 	public String getName() {
@@ -24,9 +25,16 @@ public class SubcategoryDto {
 	public void setName(String name) {
 		this.name = name;
 	}
+	public String getActiveFg() {
+		return activeFg;
+	}
+	public void setActiveFg(String activeFg) {
+		this.activeFg = activeFg;
+	}
 	
 	@Override
 	public String toString() {
-		return "SubcategoryDto [categoryId=" + categoryId + ", subcategoryId=" + subcategoryId + ", name=" + name + "]";
+		return "SubcategoryDto [categoryId=" + category + ", subcategoryId=" + subcategoryId + ", name=" + name
+				+ ", activeFg=" + activeFg + "]";
 	}
 }

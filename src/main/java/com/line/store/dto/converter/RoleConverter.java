@@ -14,6 +14,7 @@ public class RoleConverter extends AbstractConverter<Role, RoleDto>{
 		
 		role.setName(dto.getName());
 		role.setRoleId(dto.getRoleId());
+		role.setClientFg(dto.getClientFg());
 		
 		return role;
 	}
@@ -24,6 +25,7 @@ public class RoleConverter extends AbstractConverter<Role, RoleDto>{
 		
 		role.setName(entity.getName());
 		role.setRoleId(entity.getRoleId());
+		role.setClientFg(entity.getClientFg());
 		
 		return role;
 	}
