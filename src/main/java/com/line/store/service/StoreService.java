@@ -39,11 +39,11 @@ public class StoreService {
 	StoreConverter storeConverter;
 	@Autowired
 	CryptPassword cryptPassword;
-	
-	public ApiResponse FindAllActives() {
-		
+
+	public ApiResponse findAllActives() {
+
 		List<StoreDto> stores = storeConverter.fromEntity(storeDao.findByActiveFg("S"));
-		
+
 		return ApiResponse.of(ApiState.SUCCESS.getCode(), ApiState.SUCCESS.getMessage(), stores, stores.size());
 	}
 
@@ -57,7 +57,7 @@ public class StoreService {
 	public ApiResponse create(String request) throws ApiException {
 		Store newStore;
 		StoreDto store;
-		
+
 		User newUser;
 
 		JsonNode root;
@@ -89,7 +89,7 @@ public class StoreService {
 			description = root.path("description").asText();
 			website = root.path("website").asText();
 			phone = root.path("phone").asText();
-			
+
 			name = root.path("name").asText();
 			email = root.path("email").asText();
 			password = root.path("password").asText();
@@ -106,9 +106,9 @@ public class StoreService {
 		try {
 
 			newStore = new Store();
-			
+
 			storeId = UUID.randomUUID().toString();
-			
+
 			newStore.setStoreId(storeId);
 			newStore.setSubcategory(subcategory);
 			newStore.setActiveFg(activeFg);
@@ -124,10 +124,10 @@ public class StoreService {
 			// Administrator Role
 			Role role = roleDao.findById(1).orElseThrow(
 					() -> new ApiException(ApiState.ROLE_NOT_FOUND.getCode(), ApiState.ROLE_NOT_FOUND.getMessage()));
-			
+
 			newUser = new User();
 			userId = UUID.randomUUID().toString();
-			
+
 			newUser.setUserId(userId);
 			newUser.setStore(newStore);
 			newUser.setRole(role);
@@ -137,8 +137,63 @@ public class StoreService {
 			newUser.setEmail(email);
 			newUser.setPassword(cryptPassword.encode(password));
 			newUser.setActiveFg(activeFg);
-			
+
 			userDao.save(newUser);
+
+		} catch (Exception e) {
+			throw new ApiException(ApiState.NO_APPLICATION_PROCESSED.getCode(),
+					ApiState.NO_APPLICATION_PROCESSED.getMessage(), e.getMessage());
+		}
+
+		return ApiResponse.of(ApiState.SUCCESS.getCode(), ApiState.SUCCESS.getMessage(), store);
+	}
+
+	public ApiResponse update(String request) throws ApiException {
+		Store newStore;
+		StoreDto store;
+
+		JsonNode root;
+
+		// Store Data
+		String storeId = null;
+		String publicName = null;
+		Double latitude = null;
+		Double longitude = null;
+		String description = null;
+		String website = null;
+		String phone = null;
+
+		try {
+			root = new ObjectMapper().readTree(request);
+
+			storeId = root.findPath("storeId").asText();
+			publicName = root.path("publicName").asText();
+			latitude = root.path("latitude").asDouble();
+			longitude = root.path("longitude").asDouble();
+			description = root.path("description").asText();
+			website = root.path("website").asText();
+			phone = root.path("phone").asText();
+
+		} catch (JsonProcessingException e) {
+			throw new ApiException(ApiState.NO_APPLICATION_PROCESSED.getCode(),
+					ApiState.NO_APPLICATION_PROCESSED.getMessage(), e.getMessage());
+		}
+
+		try {
+
+			newStore = storeDao.findById(storeId).orElseThrow(
+					() -> new ApiException(ApiState.STORE_NOT_FOUND.getCode(), ApiState.STORE_NOT_FOUND.getMessage()));
+
+			storeId = UUID.randomUUID().toString();
+
+			newStore.setPublicName(publicName);
+			newStore.setLatitude(latitude);
+			newStore.setLongitude(longitude);
+			newStore.setDescription(description);
+			newStore.setWebsite(website);
+			newStore.setPhone(phone);
+
+			store = storeConverter.fromEntity(storeDao.save(newStore));
 
 		} catch (Exception e) {
 			throw new ApiException(ApiState.NO_APPLICATION_PROCESSED.getCode(),

@@ -66,7 +66,6 @@ public class UserDto {
 	public void setImage(String image) {
 		this.image = image;
 	}
-
 	@Override
 	public String toString() {
 		return "UserDto [userId=" + userId + ", store=" + store + ", role=" + role + ", storeFg=" + storeFg + ", name="

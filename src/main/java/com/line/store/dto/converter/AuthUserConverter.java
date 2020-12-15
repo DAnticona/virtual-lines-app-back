@@ -1,6 +1,7 @@
 package com.line.store.dto.converter;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.line.store.dto.AuthUser;
@@ -8,11 +9,16 @@ import com.line.store.entity.User;
 
 @Component
 public class AuthUserConverter extends AbstractConverter<User, AuthUser> {
+	
+	@Value("${avatar.url}")
+	private String avatarUrl;
 
 	@Autowired
 	StoreConverter storeConverter;
 	@Autowired
 	RoleConverter roleConverter;
+	@Autowired
+	SlotConverter slotConverter;
 	
 	@Override
 	public User fromDto(AuthUser dto) {
@@ -47,6 +53,12 @@ public class AuthUserConverter extends AbstractConverter<User, AuthUser> {
 		user.setStoreFg(entity.getStoreFg());
 		user.setImage(entity.getImage());
 		
+		if(entity.getImage() != null) {
+			user.setImage(avatarUrl + entity.getImage());
+		} else {
+			user.setImage(entity.getImage());
+		}
+		
 		if(entity.getRole() != null) {
 			user.setRole(roleConverter.fromEntity(entity.getRole()));
 		}
@@ -57,5 +69,4 @@ public class AuthUserConverter extends AbstractConverter<User, AuthUser> {
 		
 		return user;
 	}
-
 }

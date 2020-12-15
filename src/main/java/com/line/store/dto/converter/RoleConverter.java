@@ -30,4 +30,10 @@ public class RoleConverter extends AbstractConverter<Role, RoleDto>{
 		return role;
 	}
 
+//	@Override
+//	public RoleDto fromEntity(Role entity, boolean value1, boolean value2) {
+//		// TODO Auto-generated method stub
+//		return null;
+//	}
+
 }

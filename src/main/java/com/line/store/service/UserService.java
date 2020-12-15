@@ -1,11 +1,13 @@
 package com.line.store.service;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.DisabledException;
@@ -16,6 +18,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -35,9 +38,13 @@ import com.line.store.entity.Store;
 import com.line.store.entity.User;
 import com.line.store.exception.ApiException;
 import com.line.store.util.CryptPassword;
+import com.line.store.util.Utils;
 
 @Service("userDetailsService")
 public class UserService implements UserDetailsService {
+
+	@Value("${avatar.path}")
+	private String avatarPath;
 
 	@Autowired
 	UserDao userDao;
@@ -57,11 +64,13 @@ public class UserService implements UserDetailsService {
 	UserConverter userConverter;
 	@Autowired
 	CryptPassword cryptPassword;
+	@Autowired
+	Utils UTILS;
 
 	@Override
 	public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
 
-		User user = userDao.findByEmail(email);
+		User user = userDao.findByEmail(email).orElse(null);
 
 		if (user == null) {
 			throw new UsernameNotFoundException(email);
@@ -76,6 +85,28 @@ public class UserService implements UserDetailsService {
 		roles.add(new SimpleGrantedAuthority(user.getRole().getName()));
 
 		return new org.springframework.security.core.userdetails.User(user.getEmail(), user.getPassword(), roles);
+	}
+
+	public ApiResponse findByEmail(String email) {
+
+		User user = userDao.findByEmail(email).orElse(null);
+		UserDto userDto = null;
+
+		if (user != null) {
+			userDto = userConverter.fromEntity(user);
+		}
+
+		return ApiResponse.of(ApiState.SUCCESS.getCode(), ApiState.SUCCESS.getMessage(), userDto, null);
+	}
+
+	public ApiResponse findByStoreId(String storeId) throws ApiException {
+
+		Store store = storeDao.findById(storeId).orElseThrow(
+				() -> new ApiException(ApiState.STORE_NOT_FOUND.getCode(), ApiState.STORE_NOT_FOUND.getMessage()));
+
+		List<UserDto> users = userConverter.fromEntity(userDao.findByStore(store));
+
+		return ApiResponse.of(ApiState.SUCCESS.getCode(), ApiState.SUCCESS.getMessage(), users, users.size());
 	}
 
 	public ApiResponse login(String request) throws ApiException {
@@ -110,7 +141,9 @@ public class UserService implements UserDetailsService {
 
 		final UserDetails userDetails = userDetailsService.loadUserByUsername(email);
 		final String token = jwtToken.generateToken(userDetails);
-		User user = userDao.findByEmail(email);
+
+		User user = userDao.findByEmail(email).orElseThrow(
+				() -> new ApiException(ApiState.USER_NOT_FOUND.getCode(), ApiState.USER_NOT_FOUND.getMessage()));
 
 		authUser = new AuthUser();
 		authUser = authUserConverter.fromEntity(user);
@@ -169,10 +202,13 @@ public class UserService implements UserDetailsService {
 
 		try {
 
-			newUser = new User();
-
 			if (StringUtils.isBlank(userId)) {
 				userId = UUID.randomUUID().toString();
+				newUser = new User();
+				newUser.setPassword(cryptPassword.encode(password));
+			} else {
+				newUser = userDao.findById(userId).orElseThrow(() -> new ApiException(ApiState.USER_NOT_FOUND.getCode(),
+						ApiState.USER_NOT_FOUND.getMessage()));
 			}
 
 			newUser.setUserId(userId);
@@ -181,9 +217,8 @@ public class UserService implements UserDetailsService {
 			newUser.setStoreFg(storeFg);
 			newUser.setName(name);
 			newUser.setEmail(email);
-			newUser.setPassword(cryptPassword.encode(password));
 			newUser.setActiveFg(activeFg);
-			if (StringUtils.isBlank(image)) {
+			if (StringUtils.isBlank(image) || "null".equals(image)) {
 				newUser.setImage(null);
 			} else {
 				newUser.setImage(image);
@@ -199,4 +234,75 @@ public class UserService implements UserDetailsService {
 		return ApiResponse.of(ApiState.SUCCESS.getCode(), ApiState.SUCCESS.getMessage(), user);
 	}
 
+	public ApiResponse changePassword(String request) throws ApiException {
+		User newUser;
+		UserDto user;
+
+		JsonNode root;
+
+		String userId = null;
+		String password = null;
+
+		try {
+			root = new ObjectMapper().readTree(request);
+
+			userId = root.path("userId").asText();
+			password = root.path("password").asText();
+
+		} catch (JsonProcessingException e) {
+			throw new ApiException(ApiState.NO_APPLICATION_PROCESSED.getCode(),
+					ApiState.NO_APPLICATION_PROCESSED.getMessage(), e.getMessage());
+		}
+
+		try {
+
+			newUser = userDao.findById(userId).orElseThrow(
+					() -> new ApiException(ApiState.USER_NOT_FOUND.getCode(), ApiState.USER_NOT_FOUND.getMessage()));
+
+			newUser.setPassword(cryptPassword.encode(password));
+
+			user = userConverter.fromEntity(userDao.save(newUser));
+
+		} catch (Exception e) {
+			throw new ApiException(ApiState.NO_APPLICATION_PROCESSED.getCode(),
+					ApiState.NO_APPLICATION_PROCESSED.getMessage(), e.getMessage());
+		}
+
+		return ApiResponse.of(ApiState.SUCCESS.getCode(), ApiState.SUCCESS.getMessage(), user);
+	}
+
+	public ApiResponse changeAvatar(String userId, MultipartFile multipartFile) throws ApiException {
+		User user;
+		UserDto userDto;
+
+		try {
+
+			user = userDao.findById(userId).orElseThrow(
+					() -> new ApiException(ApiState.USER_NOT_FOUND.getCode(), ApiState.USER_NOT_FOUND.getMessage()));
+
+			if (!multipartFile.getContentType().equals("image/png")) {
+				throw new ApiException(ApiState.IMAGE_INVALID.getCode(), ApiState.IMAGE_INVALID.getMessage(), null);
+			}
+
+			String filename = UUID.randomUUID().toString() + ".png";
+						
+			UTILS.multipartFileToFile(multipartFile, filename, avatarPath);
+			
+			if(user.getImage() != null) {
+				String oldFilename = user.getImage();
+				UTILS.deleteFile(oldFilename, avatarPath);	
+			}
+
+			user.setImage(filename);
+
+			userDto = userConverter.fromEntity(userDao.save(user));
+
+		} catch (Exception e) {
+			throw new ApiException(ApiState.NO_APPLICATION_PROCESSED.getCode(),
+					ApiState.NO_APPLICATION_PROCESSED.getMessage(), e.getMessage());
+		}
+
+		return ApiResponse.of(ApiState.SUCCESS.getCode(), ApiState.SUCCESS.getMessage(), userDto);
+//		return ApiResponse.of(ApiState.SUCCESS.getCode(), ApiState.SUCCESS.getMessage(), null);
+	}
 }

@@ -1,15 +1,14 @@
 package com.line.store.dto;
 
-import java.time.LocalTime;
-
 public class SlotDto {
 	
 	private String slotId;
 	private LineDto line;
 	private UserDto user;
 	private String activeFg;
-	private LocalTime startDate;
-	private LocalTime endDate;
+	private String attendedFg;
+	private Long startDate;
+	private Long endDate;
 	
 	public String getSlotId() {
 		return slotId;
@@ -35,22 +34,27 @@ public class SlotDto {
 	public void setActiveFg(String activeFg) {
 		this.activeFg = activeFg;
 	}
-	public LocalTime getStartDate() {
+	public Long getStartDate() {
 		return startDate;
 	}
-	public void setStartDate(LocalTime startDate) {
+	public void setStartDate(Long startDate) {
 		this.startDate = startDate;
 	}
-	public LocalTime getEndDate() {
+	public Long getEndDate() {
 		return endDate;
 	}
-	public void setEndDate(LocalTime endDate) {
+	public void setEndDate(Long endDate) {
 		this.endDate = endDate;
 	}
-	
+	public String getAttendedFg() {
+		return attendedFg;
+	}
+	public void setAttendedFg(String attendedFg) {
+		this.attendedFg = attendedFg;
+	}
 	@Override
 	public String toString() {
 		return "SlotDto [slotId=" + slotId + ", line=" + line + ", user=" + user + ", activeFg=" + activeFg
-				+ ", startDate=" + startDate + ", endDate=" + endDate + "]";
+				+ ", attendedFg=" + attendedFg + ", startDate=" + startDate + ", endDate=" + endDate + "]";
 	}
 }

@@ -1,7 +1,7 @@
 package com.line.store.entity;
 
 import java.io.Serializable;
-import java.time.LocalTime;
+import java.time.LocalDateTime;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -9,6 +9,8 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
+
+import com.fasterxml.jackson.annotation.JsonBackReference;
 
 @Entity
 @Table(name = "slot")
@@ -22,20 +24,25 @@ public class Slot implements Serializable {
 	
 	@ManyToOne
 	@JoinColumn(name = "line_id", referencedColumnName = "line_id")
+	@JsonBackReference
 	private Line line;
 	
 	@ManyToOne(optional = true)
 	@JoinColumn(name = "user_id", referencedColumnName = "user_id")
+	@JsonBackReference
 	private User user;
 	
 	@Column(name = "active_fg", nullable = false)
 	private String activeFg;
 	
+	@Column(name = "attended_fg", nullable = false)
+	private String attendedFg;
+	
 	@Column(name = "start_date", nullable = false)
-	private LocalTime startDate;
+	private LocalDateTime startDate;
 	
 	@Column(name = "end_date")
-	private LocalTime endDate;
+	private LocalDateTime endDate;
 
 	public String getSlotId() {
 		return slotId;
@@ -69,26 +76,33 @@ public class Slot implements Serializable {
 		this.activeFg = activeFg;
 	}
 
-	public LocalTime getStartDate() {
+	public LocalDateTime getStartDate() {
 		return startDate;
 	}
 
-	public void setStartDate(LocalTime startDate) {
+	public void setStartDate(LocalDateTime startDate) {
 		this.startDate = startDate;
 	}
 
-	public LocalTime getEndDate() {
+	public LocalDateTime getEndDate() {
 		return endDate;
 	}
 
-	public void setEndDate(LocalTime endDate) {
+	public void setEndDate(LocalDateTime endDate) {
 		this.endDate = endDate;
+	}
+
+	public String getAttendedFg() {
+		return attendedFg;
+	}
+
+	public void setAttendedFg(String attendedFg) {
+		this.attendedFg = attendedFg;
 	}
 
 	@Override
 	public String toString() {
 		return "Slot [slotId=" + slotId + ", line=" + line + ", user=" + user + ", activeFg=" + activeFg
-				+ ", startDate=" + startDate + ", endDate=" + endDate + "]";
+				+ ", attendedFg=" + attendedFg + ", startDate=" + startDate + ", endDate=" + endDate + "]";
 	}
-
 }

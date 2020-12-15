@@ -39,4 +39,10 @@ public class SubcategoryConverter extends AbstractConverter<Subcategory, Subcate
 		return subcategory;
 	}
 
+//	@Override
+//	public SubcategoryDto fromEntity(Subcategory entity, boolean value1, boolean value2) {
+//		// TODO Auto-generated method stub
+//		return null;
+//	}
+
 }

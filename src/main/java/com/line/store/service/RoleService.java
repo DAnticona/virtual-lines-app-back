@@ -26,5 +26,13 @@ public class RoleService {
 		return ApiResponse.of(ApiState.SUCCESS.getCode(), ApiState.SUCCESS.getMessage(), roles, roles.size());
 		
 	}
+	
+	public ApiResponse findAllStoreRoles() {
+		
+		List<RoleDto> roles = roleConverter.fromEntity(roleDao.findByClientFg("N"));
+		
+		return ApiResponse.of(ApiState.SUCCESS.getCode(), ApiState.SUCCESS.getMessage(), roles, roles.size());
+		
+	}
 
 }

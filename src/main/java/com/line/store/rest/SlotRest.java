@@ -8,76 +8,61 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.multipart.MultipartFile;
 
 import com.line.store.dto.ApiResponse;
 import com.line.store.dto.ErrorResponse;
 import com.line.store.exception.ApiException;
-import com.line.store.service.UserService;
+import com.line.store.service.SlotService;
 
 @RestController
-@RequestMapping("/user")
-public class UserRest {
+@RequestMapping("/slot")
+public class SlotRest {
 
 	@Autowired
-	UserService userService;
-	
-	@GetMapping("{email}")
-	public ResponseEntity<?> findByEmail(@PathVariable String email) {
+	SlotService slotService;
+
+	@GetMapping("/line/{id}")
+	public ResponseEntity<?> findActivesByLine(@PathVariable String id) {
 
 		ApiResponse response;
 
-		response = userService.findByEmail(email);
+		try {
+			response = slotService.findActivesByLineId(id);
+
+		} catch (ApiException e) {
+			return new ResponseEntity<>(ErrorResponse.of(e.getCode(), e.getMessage(), e.getDetailMessage()),
+					HttpStatus.PRECONDITION_FAILED);
+
+		}
+
+		return ResponseEntity.ok(response);
+	}
+
+	@GetMapping("/line/{lineId}/user/{userId}")
+	public ResponseEntity<?> findActiveByLineIdUserId(@PathVariable String lineId, @PathVariable String userId) {
+
+		ApiResponse response;
+
+		try {
+			response = slotService.findActiveByLineIdUserId(lineId, userId);
+
+		} catch (ApiException e) {
+			return new ResponseEntity<>(ErrorResponse.of(e.getCode(), e.getMessage(), e.getDetailMessage()),
+					HttpStatus.PRECONDITION_FAILED);
+
+		}
 
 		return ResponseEntity.ok(response);
 	}
 
 	@PostMapping
-	public ResponseEntity<?> createUser(@RequestBody String request) {
+	public ResponseEntity<?> save(@RequestBody String request) {
 
 		ApiResponse response;
-		
+
 		try {
-
-			response = userService.save(request);
-
-		} catch (ApiException e) {
-			return new ResponseEntity<>(ErrorResponse.of(e.getCode(), e.getMessage(), e.getDetailMessage()),
-					HttpStatus.PRECONDITION_FAILED);
-
-		}
-
-		return ResponseEntity.ok(response);
-	}
-	
-	@PostMapping("/password")
-	public ResponseEntity<?> changePassword(@RequestBody String request) {
-
-		ApiResponse response;
-		
-		try {
-
-			response = userService.changePassword(request);
-
-		} catch (ApiException e) {
-			return new ResponseEntity<>(ErrorResponse.of(e.getCode(), e.getMessage(), e.getDetailMessage()),
-					HttpStatus.PRECONDITION_FAILED);
-
-		}
-
-		return ResponseEntity.ok(response);
-	}
-	
-	@PostMapping("/avatar")
-	public ResponseEntity<?> changeAvatar(@RequestParam("userId") String userId, @RequestParam("file") MultipartFile multipartFile) {
-
-		ApiResponse response;
-		
-		try {
-
-			response = userService.changeAvatar(userId, multipartFile);
+			response = slotService.save(request);
 
 		} catch (ApiException e) {
 			return new ResponseEntity<>(ErrorResponse.of(e.getCode(), e.getMessage(), e.getDetailMessage()),

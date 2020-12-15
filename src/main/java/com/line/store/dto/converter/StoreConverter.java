@@ -1,6 +1,7 @@
 package com.line.store.dto.converter;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.line.store.dto.StoreDto;
@@ -8,6 +9,11 @@ import com.line.store.entity.Store;
 
 @Component
 public class StoreConverter extends AbstractConverter<Store, StoreDto> {
+	
+	@Value("${image.url}")
+	private String imageUrl;
+	@Value("${avatar.url}")
+	private String avatarUrl;
 
 	@Autowired
 	SubcategoryConverter subcategoryConverter;
@@ -40,12 +46,23 @@ public class StoreConverter extends AbstractConverter<Store, StoreDto> {
 		store.setStoreId(entity.getStoreId());
 		store.setDescription(entity.getDescription());
 		store.setActiveFg(entity.getActiveFg());
-		store.setImage(entity.getImage());
 		store.setLatitude(entity.getLatitude());
 		store.setLongitude(entity.getLongitude());
 		store.setPhone(entity.getPhone());
 		store.setPublicName(entity.getPublicName());
 		store.setWebsite(entity.getWebsite());
+		
+		if(entity.getImage() != null) {
+			store.setImage(imageUrl + entity.getImage());
+		} else {
+			store.setImage(entity.getImage());
+		}
+
+		if(entity.getAvatar() != null) {
+			store.setAvatar(avatarUrl + entity.getAvatar());
+		} else {
+			store.setAvatar(entity.getAvatar());
+		}
 		
 		if(entity.getSubcategory() != null) {
 			store.setSubcategory(subcategoryConverter.fromEntity(entity.getSubcategory()));
@@ -53,5 +70,4 @@ public class StoreConverter extends AbstractConverter<Store, StoreDto> {
 		
 		return store;
 	}
-
 }

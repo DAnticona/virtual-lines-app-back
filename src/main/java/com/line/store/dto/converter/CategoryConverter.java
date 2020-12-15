@@ -40,6 +40,12 @@ public class CategoryConverter extends AbstractConverter<Category, CategoryDto> 
 		
 		return category;
 	}
+
+//	@Override
+//	public CategoryDto fromEntity(Category entity, boolean value1, boolean value2) {
+//		// TODO Auto-generated method stub
+//		return null;
+//	}
 	
 	
 

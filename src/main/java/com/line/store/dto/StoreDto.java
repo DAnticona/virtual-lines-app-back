@@ -9,6 +9,7 @@ public class StoreDto {
 	private Double latitude;
 	private Double longitude;
 	private String image;
+	private String avatar;
 	private String description;
 	private String website;
 	private String phone;
@@ -73,7 +74,12 @@ public class StoreDto {
 	public void setPhone(String phone) {
 		this.phone = phone;
 	}
-	
+	public String getAvatar() {
+		return avatar;
+	}
+	public void setAvatar(String avatar) {
+		this.avatar = avatar;
+	}
 	@Override
 	public String toString() {
 		return "StoreDto [storeId=" + storeId + ", subcategory=" + subcategory + ", activeFg=" + activeFg
