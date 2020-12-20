@@ -65,7 +65,6 @@ public class StoreService {
 		// Store Data
 		String storeId = null;
 		String subcategoryId = null;
-		String activeFg = null;
 		String publicName = null;
 		Double latitude = null;
 		Double longitude = null;
@@ -77,12 +76,12 @@ public class StoreService {
 		String name = null;
 		String email = null;
 		String password = null;
+		String activeFg = null;
 
 		try {
 			root = new ObjectMapper().readTree(request);
 
 			subcategoryId = root.path("subcategoryId").asText();
-			activeFg = root.path("activeFg").asText();
 			publicName = root.path("publicName").asText();
 			latitude = root.path("latitude").asDouble();
 			longitude = root.path("longitude").asDouble();
@@ -93,6 +92,7 @@ public class StoreService {
 			name = root.path("name").asText();
 			email = root.path("email").asText();
 			password = root.path("password").asText();
+			activeFg = "N";
 
 		} catch (JsonProcessingException e) {
 			throw new ApiException(ApiState.NO_APPLICATION_PROCESSED.getCode(),

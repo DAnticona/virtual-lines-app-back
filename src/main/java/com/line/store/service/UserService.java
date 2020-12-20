@@ -1,6 +1,5 @@
 package com.line.store.service;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -123,9 +122,9 @@ public class UserService implements UserDetailsService {
 
 			email = root.path("email").asText();
 			password = root.path("password").asText();
-
+			System.out.println("AUTENTICANDO");
 			authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(email, password));
-
+			System.out.println("AUTENTICADO");
 		} catch (JsonProcessingException e) {
 			throw new ApiException(ApiState.NO_APPLICATION_PROCESSED.getCode(),
 					ApiState.NO_APPLICATION_PROCESSED.getMessage(), e.getMessage());
@@ -148,8 +147,10 @@ public class UserService implements UserDetailsService {
 		authUser = new AuthUser();
 		authUser = authUserConverter.fromEntity(user);
 
+		System.out.println("AQUI");
 		if (authUser.getActiveFg().equalsIgnoreCase("N")) {
-			throw new ApiException(ApiState.USER_DISABLED.getCode(), ApiState.USER_DISABLED.getMessage());
+			System.out.println("INACTIVO");
+			throw new ApiException(ApiState.USER_DISABLED.getCode(), ApiState.USER_DISABLED.getMessage(), null);
 		}
 
 		authUser.setToken(token);
@@ -171,7 +172,6 @@ public class UserService implements UserDetailsService {
 		String email = null;
 		String password = null;
 		String activeFg = null;
-		String image = null;
 
 		try {
 			root = new ObjectMapper().readTree(request);
@@ -184,7 +184,6 @@ public class UserService implements UserDetailsService {
 			email = root.path("email").asText();
 			password = root.path("password").asText();
 			activeFg = root.path("activeFg").asText();
-			image = root.path("image").asText();
 
 		} catch (JsonProcessingException e) {
 			throw new ApiException(ApiState.NO_APPLICATION_PROCESSED.getCode(),
@@ -218,11 +217,6 @@ public class UserService implements UserDetailsService {
 			newUser.setName(name);
 			newUser.setEmail(email);
 			newUser.setActiveFg(activeFg);
-			if (StringUtils.isBlank(image) || "null".equals(image)) {
-				newUser.setImage(null);
-			} else {
-				newUser.setImage(image);
-			}
 
 			user = userConverter.fromEntity(userDao.save(newUser));
 
@@ -260,6 +254,8 @@ public class UserService implements UserDetailsService {
 					() -> new ApiException(ApiState.USER_NOT_FOUND.getCode(), ApiState.USER_NOT_FOUND.getMessage()));
 
 			newUser.setPassword(cryptPassword.encode(password));
+			
+			System.out.println(newUser);
 
 			user = userConverter.fromEntity(userDao.save(newUser));
 

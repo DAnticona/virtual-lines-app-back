@@ -15,11 +15,8 @@ import com.line.store.dto.converter.UserConverter;
 import com.line.store.exception.ApiException;
 import com.line.store.service.UserService;
 
-import lombok.extern.slf4j.Slf4j;
-
 @RestController
 @RequestMapping("/login")
-@Slf4j
 public class LoginRest {
 
 	@Autowired
@@ -32,7 +29,6 @@ public class LoginRest {
 	@PostMapping
 	public ResponseEntity<?> login(@RequestBody String request) {
 
-		log.info(request);
 		ApiResponse response;
 		
 		try {

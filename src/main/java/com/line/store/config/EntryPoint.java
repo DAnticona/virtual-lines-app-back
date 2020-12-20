@@ -20,7 +20,7 @@ public class EntryPoint implements AuthenticationEntryPoint, Serializable {
 	public void commence(HttpServletRequest request, HttpServletResponse response,
 			AuthenticationException authException) throws IOException, ServletException {
 
-		response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Token no válido o vencido, vuelva a iniciar sesión");
+		response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "No autorizado");
 
 	}
 
