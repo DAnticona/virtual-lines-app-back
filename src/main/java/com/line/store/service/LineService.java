@@ -13,6 +13,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.line.store.constant.ApiState;
 import com.line.store.dao.LineDao;
+import com.line.store.dao.SlotDao;
 import com.line.store.dao.StoreDao;
 import com.line.store.dto.ApiResponse;
 import com.line.store.dto.LineDto;
@@ -28,6 +29,8 @@ public class LineService {
 	LineDao lineDao;
 	@Autowired
 	StoreDao storeDao;
+	@Autowired
+	SlotDao slotDao;
 
 	@Autowired
 	LineConverter lineConverter;
@@ -39,6 +42,11 @@ public class LineService {
 
 		List<LineDto> lines = lineConverter.fromEntity(lineDao.findByStore(store).stream()
 				.filter(x -> x.getActiveFg().equals("S")).collect(Collectors.toList()));
+
+		for (LineDto line : lines) {
+			line.setClientsCount(slotDao.countByActiveFgByLineId(line.getLineId(), "S").orElseThrow(
+					() -> new ApiException(ApiState.LINE_NOT_FOUND.getCode(), ApiState.LINE_NOT_FOUND.getMessage())));
+		}
 
 		return ApiResponse.of(ApiState.SUCCESS.getCode(), ApiState.SUCCESS.getMessage(), lines, lines.size());
 	}
@@ -101,16 +109,6 @@ public class LineService {
 		}
 
 		return ApiResponse.of(ApiState.SUCCESS.getCode(), ApiState.SUCCESS.getMessage(), line);
-	}
-
-	public ApiResponse delete(String id) throws ApiException {
-
-		Line line = lineDao.findById(id).orElseThrow(
-				() -> new ApiException(ApiState.LINE_NOT_FOUND.getCode(), ApiState.LINE_NOT_FOUND.getMessage()));
-
-		lineDao.delete(line);
-
-		return ApiResponse.of(ApiState.SUCCESS.getCode(), ApiState.SUCCESS.getMessage(), line, null);
 	}
 
 }

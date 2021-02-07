@@ -1,6 +1,7 @@
 package com.line.store.service;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -30,6 +31,8 @@ public class RoleService {
 	public ApiResponse findAllStoreRoles() {
 		
 		List<RoleDto> roles = roleConverter.fromEntity(roleDao.findByClientFg("N"));
+		
+		roles = roles.stream().filter(x -> x.getRoleId() != 4).collect(Collectors.toList());
 		
 		return ApiResponse.of(ApiState.SUCCESS.getCode(), ApiState.SUCCESS.getMessage(), roles, roles.size());
 		

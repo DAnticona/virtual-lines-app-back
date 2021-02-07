@@ -1,6 +1,7 @@
 package com.line.store.config;
 
 import java.io.Serializable;
+import java.time.ZoneId;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -16,10 +17,11 @@ import io.jsonwebtoken.SignatureAlgorithm;
 
 @Component
 public class JwtToken implements Serializable {
-	
+
 	private static final long serialVersionUID = 3779837182611265215L;
 
-	public static final long JWT_TOKEN_VALIDITY = 8 * 60 * 60 * 1000;
+	@Value("${jwt.days.expiration}")
+	public long daysValidity;
 
 	@Value("${jwt.secret}")
 	private String secret;
@@ -73,9 +75,13 @@ public class JwtToken implements Serializable {
 	// compaction of the JWT to a URL-safe string
 	private String generate(Map<String, Object> requests, String username) {
 
-		return Jwts.builder().setClaims(requests).setSubject(username)
-				.setIssuedAt(new Date(System.currentTimeMillis()))
-				.setExpiration(new Date(System.currentTimeMillis() + JWT_TOKEN_VALIDITY))
+		Date now = new Date(System.currentTimeMillis());
+		
+		Date exp = Date.from(now.toInstant().atZone(ZoneId.systemDefault()).toLocalDate().plusDays(daysValidity)
+				.atStartOfDay(ZoneId.systemDefault()).toInstant());
+//		Date exp = new Date(System.currentTimeMillis() + 10000);
+
+		return Jwts.builder().setClaims(requests).setSubject(username).setIssuedAt(now).setExpiration(exp)
 				.signWith(SignatureAlgorithm.HS512, secret).compact();
 	}
 

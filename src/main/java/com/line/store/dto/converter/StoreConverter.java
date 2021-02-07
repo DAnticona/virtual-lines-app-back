@@ -16,7 +16,7 @@ public class StoreConverter extends AbstractConverter<Store, StoreDto> {
 	private String avatarUrl;
 
 	@Autowired
-	SubcategoryConverter subcategoryConverter;
+	CategoryConverter categoryConverter;
 	
 	@Override
 	public Store fromDto(StoreDto dto) {
@@ -32,8 +32,8 @@ public class StoreConverter extends AbstractConverter<Store, StoreDto> {
 		store.setPublicName(dto.getPublicName());
 		store.setWebsite(dto.getWebsite());
 		
-		if(dto.getSubcategory() != null) {
-			store.setSubcategory(subcategoryConverter.fromDto(dto.getSubcategory()));
+		if(dto.getCategory() != null) {
+			store.setCategory(categoryConverter.fromDto(dto.getCategory()));
 		}
 		
 		return store;
@@ -64,8 +64,8 @@ public class StoreConverter extends AbstractConverter<Store, StoreDto> {
 			store.setAvatar(entity.getAvatar());
 		}
 		
-		if(entity.getSubcategory() != null) {
-			store.setSubcategory(subcategoryConverter.fromEntity(entity.getSubcategory()));
+		if(entity.getCategory() != null) {
+			store.setCategory(categoryConverter.fromEntity(entity.getCategory()));
 		}
 		
 		return store;

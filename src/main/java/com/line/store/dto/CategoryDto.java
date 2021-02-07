@@ -2,15 +2,14 @@ package com.line.store.dto;
 
 public class CategoryDto {
 	
-	private String categoryId;
+	private Integer categoryId;
 	private String name;
 	private String activeFg;
-//	private List<SubcategoryDto> subcategories;
 	
-	public String getCategoryId() {
+	public Integer getCategoryId() {
 		return categoryId;
 	}
-	public void setCategoryId(String categoryId) {
+	public void setCategoryId(Integer categoryId) {
 		this.categoryId = categoryId;
 	}
 	public String getName() {
@@ -19,12 +18,6 @@ public class CategoryDto {
 	public void setName(String name) {
 		this.name = name;
 	}
-//	public List<SubcategoryDto> getSubcategories() {
-//		return subcategories;
-//	}
-//	public void setSubcategories(List<SubcategoryDto> subcategories) {
-//		this.subcategories = subcategories;
-//	}
 	public String getActiveFg() {
 		return activeFg;
 	}

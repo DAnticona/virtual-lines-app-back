@@ -4,33 +4,46 @@ import java.util.List;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.line.store.constant.ApiState;
+import com.line.store.dao.CategoryDao;
 import com.line.store.dao.RoleDao;
 import com.line.store.dao.StoreDao;
-import com.line.store.dao.SubcategoryDao;
 import com.line.store.dao.UserDao;
 import com.line.store.dto.ApiResponse;
 import com.line.store.dto.StoreDto;
 import com.line.store.dto.converter.StoreConverter;
+import com.line.store.entity.Category;
 import com.line.store.entity.Role;
 import com.line.store.entity.Store;
-import com.line.store.entity.Subcategory;
 import com.line.store.entity.User;
 import com.line.store.exception.ApiException;
 import com.line.store.util.CryptPassword;
+import com.line.store.util.Utils;
 
 @Service
 public class StoreService {
 
+	@Value("${avatar.path}")
+	private String avatarPath;
+	@Value("${image.path}")
+	private String imagePath;
+	@Value("${pageLimit.store}")
+	private Integer pageStoreLimit;
+
 	@Autowired
 	StoreDao storeDao;
 	@Autowired
-	SubcategoryDao subcategoryDao;
+	CategoryDao categoryDao;
 	@Autowired
 	UserDao userDao;
 	@Autowired
@@ -39,10 +52,31 @@ public class StoreService {
 	StoreConverter storeConverter;
 	@Autowired
 	CryptPassword cryptPassword;
+	@Autowired
+	Utils UTILS;
 
-	public ApiResponse findAllActives() {
+	public ApiResponse findAll() {
 
-		List<StoreDto> stores = storeConverter.fromEntity(storeDao.findByActiveFg("S"));
+		List<StoreDto> stores = storeConverter.fromEntity(storeDao.findAll());
+
+		return ApiResponse.of(ApiState.SUCCESS.getCode(), ApiState.SUCCESS.getMessage(), stores, stores.size());
+	}
+
+	public ApiResponse findAll(Integer pageNumber) {
+
+		Pageable pageable = PageRequest.of(pageNumber - 1, pageStoreLimit);
+
+		Page<Store> storesPage = storeDao.findAll(pageable);
+
+		List<StoreDto> stores = storeConverter.fromEntity(storesPage.getContent());
+
+		return ApiResponse.of(ApiState.SUCCESS.getCode(), ApiState.SUCCESS.getMessage(), stores,
+				Math.toIntExact(storesPage.getTotalElements()));
+	}
+
+	public ApiResponse searchByPublicName(String term) {
+
+		List<StoreDto> stores = storeConverter.fromEntity(storeDao.searchByPublicName(term));
 
 		return ApiResponse.of(ApiState.SUCCESS.getCode(), ApiState.SUCCESS.getMessage(), stores, stores.size());
 	}
@@ -52,6 +86,17 @@ public class StoreService {
 		StoreDto store = storeConverter.fromEntity(storeDao.findById(id).orElse(null));
 
 		return ApiResponse.of(ApiState.SUCCESS.getCode(), ApiState.SUCCESS.getMessage(), store, null);
+	}
+
+	public ApiResponse findByCategory(Integer categoryId) throws ApiException {
+
+		Category category = categoryDao.findById(categoryId)
+				.orElseThrow(() -> new ApiException(ApiState.CATEGORY_NOT_FOUND.getCode(),
+						ApiState.CATEGORY_NOT_FOUND.getMessage()));
+
+		List<StoreDto> stores = storeConverter.fromEntity(storeDao.findByCategory(category));
+
+		return ApiResponse.of(ApiState.SUCCESS.getCode(), ApiState.SUCCESS.getMessage(), stores, stores.size());
 	}
 
 	public ApiResponse create(String request) throws ApiException {
@@ -64,7 +109,7 @@ public class StoreService {
 
 		// Store Data
 		String storeId = null;
-		String subcategoryId = null;
+		Integer categoryId = null;
 		String publicName = null;
 		Double latitude = null;
 		Double longitude = null;
@@ -81,7 +126,7 @@ public class StoreService {
 		try {
 			root = new ObjectMapper().readTree(request);
 
-			subcategoryId = root.path("subcategoryId").asText();
+			categoryId = root.path("categoryId").asInt();
 			publicName = root.path("publicName").asText();
 			latitude = root.path("latitude").asDouble();
 			longitude = root.path("longitude").asDouble();
@@ -99,9 +144,9 @@ public class StoreService {
 					ApiState.NO_APPLICATION_PROCESSED.getMessage(), e.getMessage());
 		}
 
-		Subcategory subcategory = subcategoryDao.findById(subcategoryId)
-				.orElseThrow(() -> new ApiException(ApiState.SUBCATEGORY_NOT_FOUND.getCode(),
-						ApiState.SUBCATEGORY_NOT_FOUND.getMessage()));
+		Category category = categoryDao.findById(categoryId)
+				.orElseThrow(() -> new ApiException(ApiState.CATEGORY_NOT_FOUND.getCode(),
+						ApiState.CATEGORY_NOT_FOUND.getMessage()));
 
 		try {
 
@@ -110,7 +155,7 @@ public class StoreService {
 			storeId = UUID.randomUUID().toString();
 
 			newStore.setStoreId(storeId);
-			newStore.setSubcategory(subcategory);
+			newStore.setCategory(category);
 			newStore.setActiveFg(activeFg);
 			newStore.setPublicName(publicName);
 			newStore.setLatitude(latitude);
@@ -136,7 +181,7 @@ public class StoreService {
 			newUser.setName(name);
 			newUser.setEmail(email);
 			newUser.setPassword(cryptPassword.encode(password));
-			newUser.setActiveFg(activeFg);
+			newUser.setActiveFg("S");
 
 			userDao.save(newUser);
 
@@ -149,30 +194,38 @@ public class StoreService {
 	}
 
 	public ApiResponse update(String request) throws ApiException {
-		Store newStore;
-		StoreDto store;
+		System.out.println(request);
+		Store store;
+		StoreDto storeDto;
 
 		JsonNode root;
 
-		// Store Data
 		String storeId = null;
+		Integer categoryId = null;
 		String publicName = null;
 		Double latitude = null;
 		Double longitude = null;
 		String description = null;
 		String website = null;
 		String phone = null;
+		String activeFg = null;
 
 		try {
 			root = new ObjectMapper().readTree(request);
+			
+			System.out.println(root.findPath("categoryId").asInt());
 
 			storeId = root.findPath("storeId").asText();
+			categoryId = root.findPath("categoryId").asInt();
 			publicName = root.path("publicName").asText();
 			latitude = root.path("latitude").asDouble();
 			longitude = root.path("longitude").asDouble();
 			description = root.path("description").asText();
 			website = root.path("website").asText();
 			phone = root.path("phone").asText();
+			activeFg = root.path("activeFg").asText();
+			
+			System.out.println(categoryId);
 
 		} catch (JsonProcessingException e) {
 			throw new ApiException(ApiState.NO_APPLICATION_PROCESSED.getCode(),
@@ -181,26 +234,104 @@ public class StoreService {
 
 		try {
 
-			newStore = storeDao.findById(storeId).orElseThrow(
+			store = storeDao.findById(storeId).orElseThrow(
 					() -> new ApiException(ApiState.STORE_NOT_FOUND.getCode(), ApiState.STORE_NOT_FOUND.getMessage()));
 
-			storeId = UUID.randomUUID().toString();
+			Category category = categoryDao.findById(categoryId)
+					.orElseThrow(() -> new ApiException(ApiState.CATEGORY_NOT_FOUND.getCode(),
+							ApiState.CATEGORY_NOT_FOUND.getMessage()));
 
-			newStore.setPublicName(publicName);
-			newStore.setLatitude(latitude);
-			newStore.setLongitude(longitude);
-			newStore.setDescription(description);
-			newStore.setWebsite(website);
-			newStore.setPhone(phone);
+			System.out.println(category);
+			
+			store.setPublicName(publicName);
+			store.setCategory(category);
+			store.setLatitude(latitude);
+			store.setLongitude(longitude);
+			store.setDescription(description);
+			store.setWebsite(website);
+			store.setPhone(phone);
+			store.setActiveFg(activeFg);
 
-			store = storeConverter.fromEntity(storeDao.save(newStore));
+			storeDto = storeConverter.fromEntity(storeDao.save(store));
 
 		} catch (Exception e) {
 			throw new ApiException(ApiState.NO_APPLICATION_PROCESSED.getCode(),
 					ApiState.NO_APPLICATION_PROCESSED.getMessage(), e.getMessage());
 		}
 
-		return ApiResponse.of(ApiState.SUCCESS.getCode(), ApiState.SUCCESS.getMessage(), store);
+		return ApiResponse.of(ApiState.SUCCESS.getCode(), ApiState.SUCCESS.getMessage(), storeDto);
+	}
+
+	public ApiResponse changeAvatar(String storeId, MultipartFile multipartFile) throws ApiException {
+		Store store;
+		StoreDto storeDto;
+
+		try {
+
+			store = storeDao.findById(storeId).orElseThrow(
+					() -> new ApiException(ApiState.STORE_NOT_FOUND.getCode(), ApiState.STORE_NOT_FOUND.getMessage()));
+
+			if (!multipartFile.getContentType().equals("image/png")
+					&& !multipartFile.getContentType().equals("image/jpeg")
+					&& !multipartFile.getContentType().equals("image/jpg")) {
+				throw new ApiException(ApiState.IMAGE_INVALID.getCode(), ApiState.IMAGE_INVALID.getMessage(), null);
+			}
+
+			String filename = UUID.randomUUID().toString() + ".png";
+
+			UTILS.multipartFileToFile(multipartFile, filename, avatarPath);
+
+			if (store.getAvatar() != null) {
+				String oldFilename = store.getAvatar();
+				UTILS.deleteFile(oldFilename, avatarPath);
+			}
+
+			store.setAvatar(filename);
+
+			storeDto = storeConverter.fromEntity(storeDao.save(store));
+
+		} catch (Exception e) {
+			throw new ApiException(ApiState.NO_APPLICATION_PROCESSED.getCode(),
+					ApiState.NO_APPLICATION_PROCESSED.getMessage(), e.getMessage());
+		}
+
+		return ApiResponse.of(ApiState.SUCCESS.getCode(), ApiState.SUCCESS.getMessage(), storeDto);
+	}
+
+	public ApiResponse changeImage(String storeId, MultipartFile multipartFile) throws ApiException {
+		Store store;
+		StoreDto storeDto;
+
+		try {
+
+			store = storeDao.findById(storeId).orElseThrow(
+					() -> new ApiException(ApiState.STORE_NOT_FOUND.getCode(), ApiState.STORE_NOT_FOUND.getMessage()));
+
+			if (!multipartFile.getContentType().equals("image/png")
+					&& !multipartFile.getContentType().equals("image/jpeg")
+					&& !multipartFile.getContentType().equals("image/jpg")) {
+				throw new ApiException(ApiState.IMAGE_INVALID.getCode(), ApiState.IMAGE_INVALID.getMessage(), null);
+			}
+
+			String filename = UUID.randomUUID().toString() + ".png";
+
+			UTILS.multipartFileToFile(multipartFile, filename, imagePath);
+
+			if (store.getImage() != null) {
+				String oldFilename = store.getImage();
+				UTILS.deleteFile(oldFilename, imagePath);
+			}
+
+			store.setImage(filename);
+
+			storeDto = storeConverter.fromEntity(storeDao.save(store));
+
+		} catch (Exception e) {
+			throw new ApiException(ApiState.NO_APPLICATION_PROCESSED.getCode(),
+					ApiState.NO_APPLICATION_PROCESSED.getMessage(), e.getMessage());
+		}
+
+		return ApiResponse.of(ApiState.SUCCESS.getCode(), ApiState.SUCCESS.getMessage(), storeDto);
 	}
 
 }

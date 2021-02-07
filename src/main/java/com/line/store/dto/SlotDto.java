@@ -9,6 +9,7 @@ public class SlotDto {
 	private String attendedFg;
 	private Long startDate;
 	private Long endDate;
+	private Integer countBefore;
 	
 	public String getSlotId() {
 		return slotId;
@@ -52,9 +53,16 @@ public class SlotDto {
 	public void setAttendedFg(String attendedFg) {
 		this.attendedFg = attendedFg;
 	}
+	public Integer getCountBefore() {
+		return countBefore;
+	}
+	public void setCountBefore(Integer countBefore) {
+		this.countBefore = countBefore;
+	}
 	@Override
 	public String toString() {
 		return "SlotDto [slotId=" + slotId + ", line=" + line + ", user=" + user + ", activeFg=" + activeFg
-				+ ", attendedFg=" + attendedFg + ", startDate=" + startDate + ", endDate=" + endDate + "]";
+				+ ", attendedFg=" + attendedFg + ", startDate=" + startDate + ", endDate=" + endDate + ", countBefore="
+				+ countBefore + "]";
 	}
 }

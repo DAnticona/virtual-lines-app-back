@@ -8,7 +8,7 @@ import org.springframework.stereotype.Repository;
 import com.line.store.entity.Category;
 
 @Repository
-public interface CategoryDao extends JpaRepository<Category, String>{
+public interface CategoryDao extends JpaRepository<Category, Integer>{
 	
 	List<Category> findByActiveFg(String activeFg);
 	

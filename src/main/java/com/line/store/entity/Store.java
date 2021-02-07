@@ -20,8 +20,8 @@ public class Store implements Serializable {
 	private String storeId;
 	
 	@ManyToOne
-	@JoinColumn(name = "subcategory_id", referencedColumnName = "subcategory_id")
-	private Subcategory subcategory;
+	@JoinColumn(name = "category_id", referencedColumnName = "category_id")
+	private Category category;
 	
 	@Column(name = "active_fg", nullable = false)
 	private String activeFg;
@@ -56,11 +56,11 @@ public class Store implements Serializable {
 	public void setStoreId(String storeId) {
 		this.storeId = storeId;
 	}
-	public Subcategory getSubcategory() {
-		return subcategory;
+	public Category getCategory() {
+		return category;
 	}
-	public void setSubcategory(Subcategory subcategory) {
-		this.subcategory = subcategory;
+	public void setCategory(Category category) {
+		this.category = category;
 	}
 	public String getActiveFg() {
 		return activeFg;
@@ -118,7 +118,7 @@ public class Store implements Serializable {
 	}
 	@Override
 	public String toString() {
-		return "Store [storeId=" + storeId + ", subcategory=" + subcategory + ", activeFg=" + activeFg + ", publicName="
+		return "Store [storeId=" + storeId + ", category=" + category + ", activeFg=" + activeFg + ", publicName="
 				+ publicName + ", latitude=" + latitude + ", longitude=" + longitude + ", image=" + image + ", avatar="
 				+ avatar + ", description=" + description + ", website=" + website + ", phone=" + phone + "]";
 	}

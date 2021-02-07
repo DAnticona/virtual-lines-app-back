@@ -3,7 +3,7 @@ package com.line.store.dto;
 public class StoreDto {
 	
 	private String storeId;
-	private SubcategoryDto subcategory;
+	private CategoryDto category;
 	private String activeFg;
 	private String publicName;
 	private Double latitude;
@@ -20,11 +20,11 @@ public class StoreDto {
 	public void setStoreId(String storeId) {
 		this.storeId = storeId;
 	}
-	public SubcategoryDto getSubcategory() {
-		return subcategory;
+	public CategoryDto getCategory() {
+		return category;
 	}
-	public void setSubcategory(SubcategoryDto subcategory) {
-		this.subcategory = subcategory;
+	public void setCategory(CategoryDto category) {
+		this.category = category;
 	}
 	public String getActiveFg() {
 		return activeFg;
@@ -82,7 +82,7 @@ public class StoreDto {
 	}
 	@Override
 	public String toString() {
-		return "StoreDto [storeId=" + storeId + ", subcategory=" + subcategory + ", activeFg=" + activeFg
+		return "StoreDto [storeId=" + storeId + ", category=" + category + ", activeFg=" + activeFg
 				+ ", publicName=" + publicName + ", latitude=" + latitude + ", longitude=" + longitude + ", image="
 				+ image + ", description=" + description + ", website=" + website + ", phone=" + phone + "]";
 	}

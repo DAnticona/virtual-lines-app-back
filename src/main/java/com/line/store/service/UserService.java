@@ -7,6 +7,9 @@ import java.util.UUID;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.DisabledException;
@@ -44,6 +47,10 @@ public class UserService implements UserDetailsService {
 
 	@Value("${avatar.path}")
 	private String avatarPath;
+	@Value("${pageLimit.user}")
+	private Integer pageUserLimit;
+	@Value("${activation.email}")
+	private String activationEmail;
 
 	@Autowired
 	UserDao userDao;
@@ -75,10 +82,6 @@ public class UserService implements UserDetailsService {
 			throw new UsernameNotFoundException(email);
 		}
 
-		if ("N".equals(user.getActiveFg())) {
-			throw new DisabledException(email);
-		}
-
 		List<GrantedAuthority> roles = new ArrayList<>();
 
 		roles.add(new SimpleGrantedAuthority(user.getRole().getName()));
@@ -96,6 +99,25 @@ public class UserService implements UserDetailsService {
 		}
 
 		return ApiResponse.of(ApiState.SUCCESS.getCode(), ApiState.SUCCESS.getMessage(), userDto, null);
+	}
+
+	public ApiResponse searchByNameOrEmail(String term) {
+
+		List<UserDto> users = userConverter.fromEntity(userDao.searchByNameOrEmail(term));
+
+		return ApiResponse.of(ApiState.SUCCESS.getCode(), ApiState.SUCCESS.getMessage(), users, users.size());
+	}
+
+	public ApiResponse findAll(Integer pageNumber) {
+
+		Pageable pageable = PageRequest.of(pageNumber - 1, pageUserLimit);
+
+		Page<User> usersPage = userDao.findAll(pageable);
+
+		List<UserDto> users = userConverter.fromEntity(usersPage.getContent());
+
+		return ApiResponse.of(ApiState.SUCCESS.getCode(), ApiState.SUCCESS.getMessage(), users,
+				Math.toIntExact(usersPage.getTotalElements()));
 	}
 
 	public ApiResponse findByStoreId(String storeId) throws ApiException {
@@ -122,9 +144,9 @@ public class UserService implements UserDetailsService {
 
 			email = root.path("email").asText();
 			password = root.path("password").asText();
-			System.out.println("AUTENTICANDO");
+
 			authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(email, password));
-			System.out.println("AUTENTICADO");
+
 		} catch (JsonProcessingException e) {
 			throw new ApiException(ApiState.NO_APPLICATION_PROCESSED.getCode(),
 					ApiState.NO_APPLICATION_PROCESSED.getMessage(), e.getMessage());
@@ -146,11 +168,21 @@ public class UserService implements UserDetailsService {
 
 		authUser = new AuthUser();
 		authUser = authUserConverter.fromEntity(user);
+		
+		String message = "Revisa tu email para que actives tu cuenta.";
+		message += "<br /><br />";
+		message += "Si el correo de verificación no ha llegado, envíanos uno a:";
+		message += "<br /><br />";
+		message += "<strong>";
+		message += activationEmail;
+		message += "</strong>";
 
-		System.out.println("AQUI");
+		if (authUser.getStoreFg().equals("S") && authUser.getStore().getActiveFg().equals("N")) {
+			throw new ApiException(ApiState.STORE_DISABLED.getCode(), ApiState.STORE_DISABLED.getMessage(), message);
+		}
+
 		if (authUser.getActiveFg().equalsIgnoreCase("N")) {
-			System.out.println("INACTIVO");
-			throw new ApiException(ApiState.USER_DISABLED.getCode(), ApiState.USER_DISABLED.getMessage(), null);
+			throw new ApiException(ApiState.USER_DISABLED.getCode(), ApiState.USER_DISABLED.getMessage(), message);
 		}
 
 		authUser.setToken(token);
@@ -254,7 +286,7 @@ public class UserService implements UserDetailsService {
 					() -> new ApiException(ApiState.USER_NOT_FOUND.getCode(), ApiState.USER_NOT_FOUND.getMessage()));
 
 			newUser.setPassword(cryptPassword.encode(password));
-			
+
 			System.out.println(newUser);
 
 			user = userConverter.fromEntity(userDao.save(newUser));
@@ -276,17 +308,19 @@ public class UserService implements UserDetailsService {
 			user = userDao.findById(userId).orElseThrow(
 					() -> new ApiException(ApiState.USER_NOT_FOUND.getCode(), ApiState.USER_NOT_FOUND.getMessage()));
 
-			if (!multipartFile.getContentType().equals("image/png")) {
+			if (!multipartFile.getContentType().equals("image/png")
+					&& !multipartFile.getContentType().equals("image/jpeg")
+					&& !multipartFile.getContentType().equals("image/jpg")) {
 				throw new ApiException(ApiState.IMAGE_INVALID.getCode(), ApiState.IMAGE_INVALID.getMessage(), null);
 			}
 
 			String filename = UUID.randomUUID().toString() + ".png";
-						
+
 			UTILS.multipartFileToFile(multipartFile, filename, avatarPath);
-			
-			if(user.getImage() != null) {
+
+			if (user.getImage() != null) {
 				String oldFilename = user.getImage();
-				UTILS.deleteFile(oldFilename, avatarPath);	
+				UTILS.deleteFile(oldFilename, avatarPath);
 			}
 
 			user.setImage(filename);
@@ -299,6 +333,5 @@ public class UserService implements UserDetailsService {
 		}
 
 		return ApiResponse.of(ApiState.SUCCESS.getCode(), ApiState.SUCCESS.getMessage(), userDto);
-//		return ApiResponse.of(ApiState.SUCCESS.getCode(), ApiState.SUCCESS.getMessage(), null);
 	}
 }

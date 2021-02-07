@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.time.Instant;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -23,9 +24,17 @@ public class Utils {
 	public LocalDateTime longToLocalDateTime(Long timestamp) {
 		return LocalDateTime.ofInstant(Instant.ofEpochMilli(timestamp), TimeZone.getDefault().toZoneId());
 	}
+	
+	public LocalDate longToLocalDate(Long timestamp) {
+		return Instant.ofEpochMilli(timestamp).atZone(ZoneId.systemDefault()).toLocalDate();
+	}
 
 	public Long LocalDateTimeTolong(LocalDateTime date) {
 		return ZonedDateTime.of(date, ZoneId.systemDefault()).toInstant().toEpochMilli();
+	}
+
+	public Long LocalDateToLong(LocalDate date) {
+		return ZonedDateTime.of(date.atStartOfDay(), ZoneId.systemDefault()).toInstant().toEpochMilli();
 	}
 
 	public void multipartFileToFile(MultipartFile multipartFile, String filename, String path) {

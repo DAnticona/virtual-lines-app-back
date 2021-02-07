@@ -28,6 +28,8 @@ public class LoginRest {
 
 	@PostMapping
 	public ResponseEntity<?> login(@RequestBody String request) {
+		
+		System.out.println(request);
 
 		ApiResponse response;
 		

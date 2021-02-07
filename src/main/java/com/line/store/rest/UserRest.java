@@ -24,6 +24,24 @@ public class UserRest {
 	@Autowired
 	UserService userService;
 	
+	@GetMapping("/slice/{page}")
+	public ResponseEntity<?> findAll(@PathVariable int page) {
+
+		ApiResponse response;
+
+		response = userService.findAll(page);
+
+		return ResponseEntity.ok(response);
+	}
+	
+	@GetMapping("/search/{term}")
+	public ResponseEntity<?> searchByNameOrEmail(@PathVariable String term) {
+
+		ApiResponse response = userService.searchByNameOrEmail(term);
+
+		return ResponseEntity.ok(response);
+	}
+	
 	@GetMapping("{email}")
 	public ResponseEntity<?> findByEmail(@PathVariable String email) {
 

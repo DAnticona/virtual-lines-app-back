@@ -18,5 +18,8 @@ public interface SlotDao extends JpaRepository<Slot, String> {
 
 	@Query("SELECT s FROM Slot s WHERE s.line = :line and s.user = :user and s.activeFg = :activeFg")
 	Optional<Slot> findByLineUserActiveFg(Line line, User user, String activeFg);
+	
+	@Query(value = "SELECT count(*) FROM slot WHERE line_id = :lineId and active_fg = :activeFg", nativeQuery = true)
+	Optional<Integer> countByActiveFgByLineId(String lineId, String activeFg);
 
 }

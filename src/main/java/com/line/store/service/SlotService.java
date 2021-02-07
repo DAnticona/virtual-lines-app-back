@@ -51,22 +51,25 @@ public class SlotService {
 
 		return ApiResponse.of(ApiState.SUCCESS.getCode(), ApiState.SUCCESS.getMessage(), slots, slots.size());
 	}
-	
+
 	public ApiResponse findActiveByLineIdUserId(String lineId, String userId) throws ApiException {
 
 		Line line = lineDao.findById(lineId).orElseThrow(
 				() -> new ApiException(ApiState.LINE_NOT_FOUND.getCode(), ApiState.LINE_NOT_FOUND.getMessage()));
-		
+
 		User user = userDao.findById(userId).orElseThrow(
 				() -> new ApiException(ApiState.USER_NOT_FOUND.getCode(), ApiState.USER_NOT_FOUND.getMessage()));
 
 		SlotDto slotDto;
 		Slot slot = slotDao.findByLineUserActiveFg(line, user, "S").orElse(null);
-		
-		if(slot != null) {
-			slotDto = slotConverter.fromEntity(slot);
-		} else {
-			slotDto = null;
+
+		slotDto = slot != null ? slotConverter.fromEntity(slot) : null;
+
+		if (slotDto != null) {
+			Integer count = (int) slotDao.findByLine(line).stream()
+					.filter(x -> x.getActiveFg().equals("S") && slot.getStartDate().isAfter(x.getStartDate())).count();
+			slotDto.setCountBefore(count);
+
 		}
 
 		return ApiResponse.of(ApiState.SUCCESS.getCode(), ApiState.SUCCESS.getMessage(), slotDto, null);
@@ -105,8 +108,17 @@ public class SlotService {
 		User user = userDao.findById(userId).orElseThrow(
 				() -> new ApiException(ApiState.USER_NOT_FOUND.getCode(), ApiState.USER_NOT_FOUND.getMessage()));
 
+		if (user.getRole().getRoleId() != 3) {
+			throw new ApiException(ApiState.USER_NOT_CLIENT.getCode(), ApiState.USER_NOT_CLIENT.getMessage());
+		}
+
 		Line line = lineDao.findById(lineId).orElseThrow(
 				() -> new ApiException(ApiState.LINE_NOT_FOUND.getCode(), ApiState.LINE_NOT_FOUND.getMessage()));
+
+		if (StringUtils.isBlank(slotId) && slotDao.findByLineUserActiveFg(line, user, "S").orElse(null) != null) {
+			throw new ApiException(ApiState.USER_ALREADY_ASSIGNED.getCode(),
+					ApiState.USER_ALREADY_ASSIGNED.getMessage());
+		}
 
 		if (StringUtils.isBlank(slotId)) {
 			slot = new Slot();

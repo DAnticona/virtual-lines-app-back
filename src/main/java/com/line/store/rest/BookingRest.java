@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -12,38 +13,22 @@ import org.springframework.web.bind.annotation.RestController;
 import com.line.store.dto.ApiResponse;
 import com.line.store.dto.ErrorResponse;
 import com.line.store.exception.ApiException;
-import com.line.store.service.CategoryService;
-import com.line.store.service.StoreService;
-import com.line.store.service.UserService;
+import com.line.store.service.BookingService;
 
 @RestController
-@RequestMapping("/register")
-public class Register {
+@RequestMapping("/booking")
+public class BookingRest {
 	
 	@Autowired
-	UserService userService;
-	@Autowired
-	StoreService storeService;
-	@Autowired
-	CategoryService categoryService;
-	
-	@GetMapping("/category")
-	public ResponseEntity<?> findAllActives() {
-		ApiResponse response;
-		
-		response = categoryService.findAllActives();
-		
-		return ResponseEntity.ok(response);
-	}
-	
-	@PostMapping("/user/new-client-user")
-	public ResponseEntity<?> createUserClient(@RequestBody String request) {
+	BookingService bookingService;
+
+	@GetMapping("/schedule/{scheduleId}")
+	public ResponseEntity<?> findActivesByLine(@PathVariable String scheduleId) {
 
 		ApiResponse response;
-		
+
 		try {
-
-			response = userService.save(request);
+			response = bookingService.findActivesByScheduleId(scheduleId);
 
 		} catch (ApiException e) {
 			return new ResponseEntity<>(ErrorResponse.of(e.getCode(), e.getMessage(), e.getDetailMessage()),
@@ -53,14 +38,31 @@ public class Register {
 
 		return ResponseEntity.ok(response);
 	}
-	
-	@PostMapping("/store/new-store")
-	public ResponseEntity<?> createStore(@RequestBody String request) {
+
+	@GetMapping("/schedule/{scheduleId}/user/{userId}")
+	public ResponseEntity<?> findActiveByScheduleIdUserId(@PathVariable String scheduleId, @PathVariable String userId) {
 
 		ApiResponse response;
 
 		try {
-			response = storeService.create(request);
+			response = bookingService.findActiveByScheduleIdUserId(scheduleId, userId);
+
+		} catch (ApiException e) {
+			return new ResponseEntity<>(ErrorResponse.of(e.getCode(), e.getMessage(), e.getDetailMessage()),
+					HttpStatus.PRECONDITION_FAILED);
+
+		}
+
+		return ResponseEntity.ok(response);
+	}
+
+	@PostMapping
+	public ResponseEntity<?> save(@RequestBody String request) {
+
+		ApiResponse response;
+
+		try {
+			response = bookingService.save(request);
 
 		} catch (ApiException e) {
 			return new ResponseEntity<>(ErrorResponse.of(e.getCode(), e.getMessage(), e.getDetailMessage()),
