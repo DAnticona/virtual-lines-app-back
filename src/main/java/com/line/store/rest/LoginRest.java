@@ -14,6 +14,7 @@ import com.line.store.dto.converter.RoleConverter;
 import com.line.store.dto.converter.UserConverter;
 import com.line.store.exception.ApiException;
 import com.line.store.service.UserService;
+import com.line.store.util.PushNotification;
 
 @RestController
 @RequestMapping("/login")
@@ -22,26 +23,27 @@ public class LoginRest {
 	@Autowired
 	UserService userService;
 	@Autowired
+	PushNotification pushNotification;
+	@Autowired
 	UserConverter userConverter;
 	@Autowired
 	RoleConverter roleConverter;
 
 	@PostMapping
 	public ResponseEntity<?> login(@RequestBody String request) {
-		
-		System.out.println(request);
 
 		ApiResponse response;
-		
+
 		try {
-			
+
 			response = userService.login(request);
-			
+
 		} catch (ApiException e) {
-			return new ResponseEntity<>(ErrorResponse.of(e.getCode(), e.getMessage(), e.getDetailMessage()), HttpStatus.PRECONDITION_FAILED);
-			
+			return new ResponseEntity<>(ErrorResponse.of(e.getCode(), e.getMessage(), e.getDetailMessage()),
+					HttpStatus.PRECONDITION_FAILED);
+
 		}
-		
+
 		return ResponseEntity.ok(response);
 
 	}

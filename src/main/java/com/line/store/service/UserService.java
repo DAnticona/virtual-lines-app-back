@@ -138,12 +138,14 @@ public class UserService implements UserDetailsService {
 
 		String email = null;
 		String password = null;
+		String subscriptorId = null;
 
 		try {
 			root = new ObjectMapper().readTree(request);
 
 			email = root.path("email").asText();
 			password = root.path("password").asText();
+			subscriptorId = root.path("subscriptorId").asText();
 
 			authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(email, password));
 
@@ -166,9 +168,12 @@ public class UserService implements UserDetailsService {
 		User user = userDao.findByEmail(email).orElseThrow(
 				() -> new ApiException(ApiState.USER_NOT_FOUND.getCode(), ApiState.USER_NOT_FOUND.getMessage()));
 
+		user.setSubscriptorId(subscriptorId);
+		userDao.save(user);
+
 		authUser = new AuthUser();
 		authUser = authUserConverter.fromEntity(user);
-		
+
 		String message = "Revisa tu email para que actives tu cuenta.";
 		message += "<br /><br />";
 		message += "Si el correo de verificación no ha llegado, envíanos uno a:";
@@ -234,9 +239,18 @@ public class UserService implements UserDetailsService {
 		try {
 
 			if (StringUtils.isBlank(userId)) {
+				newUser = userDao.findByEmail(email).orElse(null);
+
+				if (newUser != null) {
+
+					throw new ApiException(ApiState.USER_ALREADY_REGISTERED.getCode(),
+							ApiState.USER_ALREADY_REGISTERED.getMessage());
+				}
+
 				userId = UUID.randomUUID().toString();
 				newUser = new User();
 				newUser.setPassword(cryptPassword.encode(password));
+
 			} else {
 				newUser = userDao.findById(userId).orElseThrow(() -> new ApiException(ApiState.USER_NOT_FOUND.getCode(),
 						ApiState.USER_NOT_FOUND.getMessage()));

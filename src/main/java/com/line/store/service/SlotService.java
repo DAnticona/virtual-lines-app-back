@@ -23,6 +23,7 @@ import com.line.store.entity.Line;
 import com.line.store.entity.Slot;
 import com.line.store.entity.User;
 import com.line.store.exception.ApiException;
+import com.line.store.util.PushNotification;
 import com.line.store.util.Utils;
 
 @Service
@@ -37,6 +38,9 @@ public class SlotService {
 
 	@Autowired
 	SlotConverter slotConverter;
+
+	@Autowired
+	PushNotification pushNotification;
 
 	@Autowired
 	Utils UTILS;
@@ -126,6 +130,12 @@ public class SlotService {
 		} else {
 			slot = slotDao.findById(slotId).orElseThrow(
 					() -> new ApiException(ApiState.SLOT_NOT_FOUND.getCode(), ApiState.SLOT_NOT_FOUND.getMessage()));
+
+			Slot nextSlot = this.getNextSlot(lineId, slotId);
+
+			if (nextSlot != null) {
+				pushNotification.slotNotification(nextSlot);
+			}
 		}
 
 		try {
@@ -146,6 +156,26 @@ public class SlotService {
 		}
 
 		return ApiResponse.of(ApiState.SUCCESS.getCode(), ApiState.SUCCESS.getMessage(), slotUserDto);
+	}
+
+	private Slot getNextSlot(String lineId, String currentSlotId) throws ApiException {
+
+		Slot nextSlot = null;
+
+		Line line = lineDao.findById(lineId).orElseThrow(
+				() -> new ApiException(ApiState.LINE_NOT_FOUND.getCode(), ApiState.LINE_NOT_FOUND.getMessage()));
+
+		List<Slot> slots = slotDao.findByLineAndActiveFgOrderByStartDateAsc(line, "S").stream()
+				.collect(Collectors.toList());
+
+		for (int i = 0; i < slots.size(); i++) {
+			if ((i + 1) < slots.size() && slots.get(i).getSlotId() == currentSlotId) {
+				nextSlot = slots.get(i + 1);
+				break;
+			}
+		}
+
+		return nextSlot;
 	}
 
 }

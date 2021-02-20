@@ -12,9 +12,11 @@ import com.line.store.entity.Store;
 
 @Repository
 public interface ScheduleDao extends JpaRepository<Schedule, String> {
-	
+
 	List<Schedule> findByStore(Store store);
-	
+
+	List<Schedule> findByDate(LocalDate date);
+
 	@Query(value = "SELECT s FROM Schedule s WHERE s.store = :store AND s.date = :date")
 	List<Schedule> findByStoreDate(Store store, LocalDate date);
 

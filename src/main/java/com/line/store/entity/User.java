@@ -18,32 +18,35 @@ public class User implements Serializable {
 	@Id
 	@Column(name = "user_id")
 	private String userId;
-	
+
 	@ManyToOne(optional = true)
 	@JoinColumn(name = "store_id", referencedColumnName = "store_id")
 	private Store store;
-	
+
 	@ManyToOne(optional = true)
 	@JoinColumn(name = "role_id", referencedColumnName = "role_id")
 	private Role role;
-	
+
 	@Column(name = "store_fg", nullable = false)
 	private String storeFg;
-	
+
 	@Column(name = "name", nullable = false)
 	private String name;
-	
+
 	@Column(name = "email", unique = true, nullable = false)
 	private String email;
-	
+
 	@Column(name = "password", nullable = false)
 	private String password;
-	
+
 	@Column(name = "active_fg", nullable = false)
 	private String activeFg;
-	
+
 	@Column(name = "image")
 	private String image;
+
+	@Column(name = "subscriptor_id")
+	private String subscriptorId;
 
 	public String getUserId() {
 		return userId;
@@ -108,7 +111,7 @@ public class User implements Serializable {
 	public void setActiveFg(String activeFg) {
 		this.activeFg = activeFg;
 	}
-	
+
 	public String getImage() {
 		return image;
 	}
@@ -117,10 +120,18 @@ public class User implements Serializable {
 		this.image = image;
 	}
 
+	public String getSubscriptorId() {
+		return subscriptorId;
+	}
+
+	public void setSubscriptorId(String subscriptorId) {
+		this.subscriptorId = subscriptorId;
+	}
+
 	@Override
 	public String toString() {
 		return "User [userId=" + userId + ", store=" + store + ", role=" + role + ", storeFg=" + storeFg + ", name="
-				+ name + ", email=" + email + ", password=" + password + ", activeFg=" + activeFg + "image=" + image + "]";
+				+ name + ", email=" + email + ", password=" + password + ", activeFg=" + activeFg + ", image=" + image
+				+ ", subscriptorId=" + subscriptorId + "]";
 	}
-
 }

@@ -1,5 +1,7 @@
 package com.line.store.service;
 
+import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -156,5 +158,21 @@ public class BookingService {
 		}
 
 		return ApiResponse.of(ApiState.SUCCESS.getCode(), ApiState.SUCCESS.getMessage(), bookingDto);
+	}
+
+	public List<Booking> getBookingsToPush() {
+
+		List<Booking> bookings = new ArrayList<>();
+		
+		LocalDate today = LocalDate.now();
+
+		List<Schedule> schedules = scheduleDao.findByDate(today);
+
+		for (Schedule schedule : schedules) {
+			bookings.addAll(bookingDao.findBySchedule(schedule));
+		}
+
+		return bookings;
+
 	}
 }

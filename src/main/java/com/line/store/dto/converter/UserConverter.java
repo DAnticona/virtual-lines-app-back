@@ -36,6 +36,7 @@ public class UserConverter extends AbstractConverter<User, UserDto>{
 		user.setName(dto.getName());
 		user.setStoreFg(dto.getStoreFg());
 		user.setImage(dto.getImage());
+		user.setSubscriptorId(dto.getSubscriptorId());
 		
 		if(dto.getRole() != null) {
 			user.setRole(roleConverter.fromDto(dto.getRole()));
@@ -57,6 +58,7 @@ public class UserConverter extends AbstractConverter<User, UserDto>{
 		user.setActiveFg(entity.getActiveFg());
 		user.setName(entity.getName());
 		user.setStoreFg(entity.getStoreFg());
+		user.setSubscriptorId(entity.getSubscriptorId());
 		
 		if(entity.getImage() != null) {
 			user.setImage(avatarUrl + entity.getImage());

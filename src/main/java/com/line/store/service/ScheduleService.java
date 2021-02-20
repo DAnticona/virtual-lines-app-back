@@ -157,6 +157,7 @@ public class ScheduleService {
 	}
 
 	public ApiResponse update(String request) throws ApiException {
+		System.out.println(request);
 		Schedule schedule;
 		ScheduleDto scheduleDto;
 
@@ -217,7 +218,7 @@ public class ScheduleService {
 			schedule.setMultipleFg(multipleFg);
 			schedule.setCapacityFg(capacityFg);
 			schedule.setCapacity(capacityFg.equals("N") ? null : capacity);
-			schedule.setReservedNu(capacityFg.equals("N") ? null : reservedNu);
+			schedule.setReservedNu(reservedNu);
 			schedule.setMaxPerClientFg(maxPerClientFg);
 			schedule.setMaxPerClient(maxPerClientFg.equals("N") ? null : maxPerClient);
 

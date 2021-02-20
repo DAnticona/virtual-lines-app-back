@@ -15,6 +15,8 @@ import com.line.store.entity.User;
 public interface SlotDao extends JpaRepository<Slot, String> {
 
 	List<Slot> findByLine(Line line);
+	
+	List<Slot> findByLineAndActiveFgOrderByStartDateAsc(Line line, String activeFg);
 
 	@Query("SELECT s FROM Slot s WHERE s.line = :line and s.user = :user and s.activeFg = :activeFg")
 	Optional<Slot> findByLineUserActiveFg(Line line, User user, String activeFg);

@@ -23,7 +23,8 @@ public enum ApiState {
 	SLOT_NOT_FOUND("8006", "Puesto desconocido"),
 	SCHEDULE_NOT_FOUND("8007", "Agenda desconocida"),
 	BOOKING_NOT_FOUND("8008", "Reserva desconocida"),
-	USER_ALREADY_ASSIGNED("8009", "El usuario ya está asignado");
+	USER_ALREADY_ASSIGNED("8009", "El usuario ya está asignado"),
+	USER_ALREADY_REGISTERED("8009", "Esta cuenta de correo electrónico ya se encuentra registrada");
 
 	private final String code;
 	private final String message;

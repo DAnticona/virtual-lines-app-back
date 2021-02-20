@@ -26,7 +26,7 @@ public class Utils {
 	}
 	
 	public LocalDate longToLocalDate(Long timestamp) {
-		return Instant.ofEpochMilli(timestamp).atZone(ZoneId.systemDefault()).toLocalDate();
+		return Instant.ofEpochMilli(timestamp).atZone(ZoneId.of("America/Lima")).toLocalDate();
 	}
 
 	public Long LocalDateTimeTolong(LocalDateTime date) {
@@ -34,7 +34,7 @@ public class Utils {
 	}
 
 	public Long LocalDateToLong(LocalDate date) {
-		return ZonedDateTime.of(date.atStartOfDay(), ZoneId.systemDefault()).toInstant().toEpochMilli();
+		return ZonedDateTime.of(date.atStartOfDay(), ZoneId.of("America/Lima")).toInstant().toEpochMilli();
 	}
 
 	public void multipartFileToFile(MultipartFile multipartFile, String filename, String path) {

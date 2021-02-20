@@ -150,6 +150,18 @@ public class StoreService {
 
 		try {
 
+			newUser = userDao.findByEmail(email).orElse(null);
+
+			if (newUser != null) {
+
+				throw new ApiException(ApiState.USER_ALREADY_REGISTERED.getCode(),
+						ApiState.USER_ALREADY_REGISTERED.getMessage());
+			}
+
+			// Administrator Role
+			Role role = roleDao.findById(1).orElseThrow(
+					() -> new ApiException(ApiState.ROLE_NOT_FOUND.getCode(), ApiState.ROLE_NOT_FOUND.getMessage()));
+
 			newStore = new Store();
 
 			storeId = UUID.randomUUID().toString();
@@ -165,10 +177,6 @@ public class StoreService {
 			newStore.setPhone(phone);
 
 			store = storeConverter.fromEntity(storeDao.save(newStore));
-
-			// Administrator Role
-			Role role = roleDao.findById(1).orElseThrow(
-					() -> new ApiException(ApiState.ROLE_NOT_FOUND.getCode(), ApiState.ROLE_NOT_FOUND.getMessage()));
 
 			newUser = new User();
 			userId = UUID.randomUUID().toString();
@@ -212,7 +220,7 @@ public class StoreService {
 
 		try {
 			root = new ObjectMapper().readTree(request);
-			
+
 			System.out.println(root.findPath("categoryId").asInt());
 
 			storeId = root.findPath("storeId").asText();
@@ -224,7 +232,7 @@ public class StoreService {
 			website = root.path("website").asText();
 			phone = root.path("phone").asText();
 			activeFg = root.path("activeFg").asText();
-			
+
 			System.out.println(categoryId);
 
 		} catch (JsonProcessingException e) {
@@ -242,7 +250,7 @@ public class StoreService {
 							ApiState.CATEGORY_NOT_FOUND.getMessage()));
 
 			System.out.println(category);
-			
+
 			store.setPublicName(publicName);
 			store.setCategory(category);
 			store.setLatitude(latitude);
